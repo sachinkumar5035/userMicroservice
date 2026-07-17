@@ -33,9 +33,7 @@ public class UserController {
         return ResponseEntity.ok(user1);
     }
 
-
     // get all users
-
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers(){
         List<User> users = userService.getAllUsers();
@@ -43,7 +41,17 @@ public class UserController {
     }
 
     // update user
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> updateUser(@PathVariable String userId,@RequestBody User user){
+        User user1 = userService.updateUser(userId,user);
+        return ResponseEntity.ok(user1);
+    }
 
     // delete user
+    @PutMapping("/userId")
+    public ResponseEntity<String> deleteUser(@PathVariable String userId){
+         userService.deleteUser(userId);
+         return ResponseEntity.ok("User deleted successfully");
+    }
 
 }
