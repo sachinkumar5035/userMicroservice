@@ -9,6 +9,7 @@ import com.microservice.user.payload.LoginRequest;
 import com.microservice.user.payload.AuthResponse;
 import com.microservice.user.payload.UserResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.microservice.user.security.JwtUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,10 +21,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -45,6 +48,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(String userId) {
         return userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("user not found for the given id"));
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("user not found for the given email"));
     }
 
     @Override
@@ -93,11 +101,13 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         UserResponse userResp = new UserResponse(savedUser.getUserId(), savedUser.getName(), savedUser.getEmail(), savedUser.getAbout(), savedUser.getRole());
+        String token = jwtUtil.generateToken(savedUser.getEmail());
 
         return AuthResponse.builder()
             .message("User registered successfully")
             .success(true)
             .user(userResp)
+            .token(token)
             .build();
     }
 
@@ -124,11 +134,13 @@ public class UserServiceImpl implements UserService {
         }
 
         UserResponse userResp = new UserResponse(user.getUserId(), user.getName(), user.getEmail(), user.getAbout(), user.getRole());
+        String token = jwtUtil.generateToken(user.getEmail());
 
         return AuthResponse.builder()
             .message("Login successful")
             .success(true)
             .user(userResp)
+            .token(token)
             .build();
     }
 }
