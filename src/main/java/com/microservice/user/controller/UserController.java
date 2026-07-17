@@ -2,6 +2,9 @@ package com.microservice.user.controller;
 
 import com.microservice.user.entities.User;
 import com.microservice.user.services.UserService;
+import com.microservice.user.payload.SignUpRequest;
+import com.microservice.user.payload.LoginRequest;
+import com.microservice.user.payload.AuthResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,10 +51,30 @@ public class UserController {
     }
 
     // delete user
-    @PutMapping("/userId")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable String userId){
          userService.deleteUser(userId);
          return ResponseEntity.ok("User deleted successfully");
+    }
+
+    // signup endpoint
+    @PostMapping("/auth/signup")
+    public ResponseEntity<AuthResponse> signUp(@RequestBody SignUpRequest signUpRequest){
+        AuthResponse response = userService.signUp(signUpRequest);
+        if(response.isSuccess()){
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // login endpoint
+    @PostMapping("/auth/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest){
+        AuthResponse response = userService.login(loginRequest);
+        if(response.isSuccess()){
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 }

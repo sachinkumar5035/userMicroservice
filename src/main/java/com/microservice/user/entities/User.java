@@ -24,6 +24,12 @@ public class User {
 
     @Column(name = "ABOUT")
     private String about;
+    
+    @Column(name = "PASSWORD", nullable = false)
+    private String password;
+    
+	@Column(name = "ROLE", nullable = false)
+	private String role;
 
     // store the rating which this user provided to the hotels
     @Transient // this will make sures Rating table will not be created in this DB, this will be fetched from the rating service
