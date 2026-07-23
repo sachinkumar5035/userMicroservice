@@ -2,7 +2,34 @@ server:
   port: 8081
 
 spring:
+  application:
+    name: userService
   datasource:
     url: jdbc:postgresql://localhost:5432/userservice
     username: postgres
     password: admin
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.security: DEBUG
+
+# JWT Configuration
+app:
+  jwt:
+    secret: "MySecretKeyForJWTThatIsAtLeast32BytesLongForHS256Algorithm"
+    expiration-ms: 600000
