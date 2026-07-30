@@ -1,5 +1,6 @@
 package com.microservice.user.services.impl;
 
+import com.microservice.user.entities.Rating;
 import com.microservice.user.entities.User;
 import com.microservice.user.exceptions.ResourceNotFoundException;
 import com.microservice.user.repositories.UserRepository;
@@ -8,10 +9,14 @@ import com.microservice.user.payload.SignUpRequest;
 import com.microservice.user.payload.LoginRequest;
 import com.microservice.user.payload.AuthResponse;
 import com.microservice.user.payload.UserResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.microservice.user.security.JwtUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
@@ -22,11 +27,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RestTemplate restTemplate;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,RestTemplate restTemplate) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -47,7 +56,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(String userId) {
-        return userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("user not found for the given id"));
+        User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("user not found for the given id"));
+        // get the rating for a given user by userId
+        List<Rating> ratings = restTemplate.getForObject("http://localhost:8083/rating/user/"+user.getUserId(), ArrayList.class);
+        user.setRatings(ratings);
+        return user;
     }
 
     @Override
