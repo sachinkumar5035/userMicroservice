@@ -1,5 +1,6 @@
 package com.microservice.user.services.impl;
 
+import com.microservice.user.entities.Hotel;
 import com.microservice.user.entities.Rating;
 import com.microservice.user.entities.User;
 import com.microservice.user.exceptions.ResourceNotFoundException;
@@ -16,10 +17,8 @@ import com.microservice.user.security.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -58,8 +57,17 @@ public class UserServiceImpl implements UserService {
     public User getUserById(String userId) {
         User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("user not found for the given id"));
         // get the rating for a given user by userId
-        List<Rating> ratings = restTemplate.getForObject("http://localhost:8083/rating/user/"+user.getUserId(), ArrayList.class);
-        user.setRatings(ratings);
+        Rating[] ratings = restTemplate.getForObject("http://localhost:8083/rating/user/"+user.getUserId(), Rating[].class);
+        List<Rating> ratingList = Arrays.asList(ratings);
+
+        // now we will have to check this rating belongs to which hotel
+        List<Rating> ratingList1 = ratingList.stream().map(rating -> {
+//            for every given rating we will have to find out the hotel info and set it in the rating entity
+            Hotel hotel = restTemplate.getForObject("http://localhost:8082/hotels/" + rating.getHotelId(), Hotel.class);
+            rating.setHotel(hotel);
+            return rating;
+        }).toList();
+        user.setRatings(ratingList);
         return user;
     }
 
