@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
-        UserResponse userResp = new UserResponse(savedUser.getUserId(), savedUser.getName(), savedUser.getEmail(), savedUser.getAbout(), savedUser.getRole());
+        UserResponse userResp = new UserResponse(savedUser.getUserId(), savedUser.getUserId(), savedUser.getName(), savedUser.getEmail(), savedUser.getAbout(), savedUser.getRole());
         String token = jwtUtil.generateToken(savedUser.getEmail());
 
         return AuthResponse.builder()
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
                 .build();
         }
 
-        UserResponse userResp = new UserResponse(user.getUserId(), user.getName(), user.getEmail(), user.getAbout(), user.getRole());
+        UserResponse userResp = new UserResponse(user.getUserId(), user.getUserId(), user.getName(), user.getEmail(), user.getAbout(), user.getRole());
         String token = jwtUtil.generateToken(user.getEmail());
 
         return AuthResponse.builder()
